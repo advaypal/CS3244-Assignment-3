@@ -1,9 +1,6 @@
-# Unable to figure out how to import data_io from this file (without changing
-# sys path), so simply rewriting that stuff here. If anyone has suggestions,
-# I would be glad to hear them.
-
 import sklearn.svm
 import numpy as np
+import data_io
 
 
 def svmTrain(featureVectors, labels, kernel, cost=None,
@@ -39,16 +36,9 @@ def svmPredict(featureVectors, svmModel):
 
 
 if __name__ == '__main__':
-    trainSamples, trainLabels = np.load('data/X_train.npy'), np.load('data/y_train.npy')
-    testSamples = np.load('data/X_test.npy')
+    trainSamples, trainLabels = data_io.loadTrainData()
+    testSamples = data_io.loadTestSamples()
 
     model = svmTrain(trainSamples, trainLabels, kernel='linear')
     predictions = svmPredict(testSamples, model)
-    np.savetxt(
-        'data/y_test.txt',
-        np.dstack((np.arange(predictions.size), predictions))[0],
-        delimiter=',',
-        header='ImageId,PredictedClass',
-        fmt='%d',
-        comments=''
-    )
+    data_io.writeTestLabels(predictions)
