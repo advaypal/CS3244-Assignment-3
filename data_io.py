@@ -5,7 +5,7 @@ DATA_FOLDER = 'data'
 TRAIN_SAMPLES = 'X_train.npy'
 TRAIN_LABELS = 'y_train.npy'
 TEST_SAMPLES = 'X_test.npy'
-TEST_LABELS = 'y_test.npy'
+TEST_LABELS = 'y_test.txt'
 
 
 def loadTrainData():
@@ -18,7 +18,14 @@ def loadTestSamples():
 
 
 def writeTestLabels(labels):
-    np.save(os.path.join(DATA_FOLDER, TEST_LABELS), labels)
+    np.savetxt(
+        os.path.join(DATA_FOLDER, TEST_LABELS),
+        np.dstack((np.arange(labels.size), labels))[0],
+        delimiter=',',
+        header='ImageId,PredictedClass',
+        fmt='%d',
+        comments=''
+    )
 
 
 if __name__ == '__main__':
@@ -26,5 +33,3 @@ if __name__ == '__main__':
     print(trainSamples.shape, trainLabels.shape)
 
     writeTestLabels(trainLabels)
-    assert np.array_equal(np.load(os.path.join(DATA_FOLDER, TEST_LABELS)),
-                          trainLabels)
