@@ -1,6 +1,7 @@
 import sklearn.svm
 import numpy as np
 import data_io
+import learning_curve
 
 
 def svmTrain(featureVectors, labels, kernel, cost=None,
@@ -31,7 +32,7 @@ def svmTrain(featureVectors, labels, kernel, cost=None,
 
     return svmModel
 
-def svmPredict(featureVectors, svmModel):
+def svmPredict(svmModel, featureVectors):
     return svmModel.predict(featureVectors)
 
 
@@ -39,6 +40,11 @@ if __name__ == '__main__':
     trainSamples, trainLabels = data_io.loadTrainData()
     testSamples = data_io.loadTestSamples()
 
-    model = svmTrain(trainSamples, trainLabels, kernel='linear')
-    predictions = svmPredict(testSamples, model)
-    data_io.writeTestLabels(predictions)
+    learning_curve.plotLearningCurve(
+        trainFunction=lambda samples, labels: svmTrain(samples,
+                                                       labels,
+                                                       kernel='linear'),
+        predictFunction=svmPredict,
+        samples=trainSamples,
+        labels=trainLabels
+    )
