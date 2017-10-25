@@ -45,7 +45,7 @@ def processData(x_train, y_train, x_test):
     return (x_train, y_train, x_test, input_shape)
 
 
-def cnnTrain(x, y, input_shape, batch_size=32, epochs=15):
+def cnnTrain(x, y, input_shape, batch_size=32, epochs=50):
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(5, 5),
                      activation='relu',
