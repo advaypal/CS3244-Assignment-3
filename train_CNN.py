@@ -16,8 +16,8 @@ B = 128  # Batch Size
 N = B * 6  # Training Samples
 E = 700  # Epochs
 
-x = np.load('X_train.npy', 'c')
-y = keras.utils.to_categorical(np.load('y_train.npy', 'r'), num_classes=7)
+x = np.load('data/X_train.npy', 'c')
+y = keras.utils.to_categorical(np.load('data/y_train.npy', 'r'), num_classes=7)
 # Shuffle to prevent overfitting validation
 p = np.random.permutation(len(x)); x = x[p]; y = y[p]  
 
@@ -128,7 +128,7 @@ model.fit_generator(gen(), steps_per_epoch=N//B, epochs=E, verbose=2,
 # If 'Enter', Create Test Predictions File -------------------------------------
 input('continue...')
 model.save('model.h5')  # Save Model Architecture and Weights
-x_test = np.load('X_test.npy', 'c')
+x_test = np.load('data/X_test.npy', 'c')
 x_test_rs = x_test.reshape(x_test.shape[0], 50, 37, 1)
 datagen.standardize(x_test_rs)
 f = open('predictions.txt', 'w')

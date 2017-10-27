@@ -14,13 +14,13 @@ B = 128  # Batch Size
 N = B * 6  # Training Samples
 E = 200  # Epochs
 
-x = np.load('X_train.npy', 'c')
+x = np.load('data/X_train.npy', 'c')
 x_train = x[:N]
 x_train_rs = x_train.reshape(N, 50, 37, 1)
 x_val = x[N:]
 x_val_rs = x_val.reshape(x_val.shape[0], 50, 37, 1)
 
-y = keras.utils.to_categorical(np.load('y_train.npy', 'r'), num_classes=7)
+y = keras.utils.to_categorical(np.load('data/y_train.npy', 'r'), num_classes=7)
 y_train = y[:N]
 y_val = y[N:]
 
@@ -78,7 +78,7 @@ model.save('model.h5')  # Save Model Architecture and Weights
 
 # If 'Enter', Create Test Predictions File
 input('continue...')
-x_test = np.load('X_test.npy', 'c')
+x_test = np.load('data/X_test.npy', 'c')
 x_test_rs = x_test.reshape(x_test.shape[0], 50, 37, 1)
 datagen.standardize(x_test_rs)
 f = open('predictions.txt', 'w')
