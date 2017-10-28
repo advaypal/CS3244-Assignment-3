@@ -19,7 +19,7 @@ E = 700  # Epochs
 x = np.load('X_train.npy', 'c')
 y = keras.utils.to_categorical(np.load('y_train.npy', 'r'), num_classes=7)
 # Shuffle to prevent overfitting validation
-p = np.random.permutation(len(x)); x = x[p]; y = y[p]  
+p = np.random.permutation(len(x)); x = x[p]; y = y[p]
 
 x_train = x[:N]
 x_train_rs = x_train.reshape(N, 50, 37, 1)
@@ -89,7 +89,7 @@ def gen():
 datagen.standardize(x_val_rs)
 
 # Remove when Submiting? (val_f1) --------------------
-from keras.callbacks import Callback 
+from keras.callbacks import Callback
 from sklearn.metrics import f1_score, precision_score, recall_score
 
 class Metrics(Callback):
@@ -97,7 +97,7 @@ class Metrics(Callback):
         self.val_f1s = []
         self.val_recalls = []
         self.val_precisions = []
- 
+
     def on_epoch_end(self, epoch, logs={}):
         val_predict = (
             np.asarray(self.model.predict(self.validation_data[0]))).round()
@@ -113,7 +113,7 @@ class Metrics(Callback):
         #if _val_f1 > NUM:
         #    print('Early Stop!')
         #    self.model.stop_training = True
- 
+
 metrics = Metrics()
 metrics.validation_data = (x_val_rs,y_val)
 
