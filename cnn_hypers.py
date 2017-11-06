@@ -17,6 +17,7 @@ import GPy
 import GPyOpt
 from GPyOpt.methods import BayesianOptimization
 import keras.backend.tensorflow_backend as ktf
+import tensorflow as tf
 
 def get_session():
     config = tf.ConfigProto()
@@ -31,38 +32,40 @@ def get_bounds():
           {'name': 'dr2', 'type': 'continuous', 'domain': [0.001, 1]},
           {'name': 'dr3', 'type': 'continuous', 'domain': [0.001, 1]}]
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+ktf.set_session(get_session())
+# Training and Validation Split ------------------------------------------------
+B = 128  # Batch Size
+N = B * 6  # Training Samples
+E = 700  # Epochs
+
+x = np.load('data/X_train.npy', 'c')
+y = keras.utils.to_categorical(np.load('data/y_train.npy', 'r'), num_classes=7)
+# Shuffle to prevent overfitting validation
+p = np.random.permutation(len(x)); x = x[p]; y = y[p]  
+
+x_train = x[:N]
+x_train_rs = x_train.reshape(N, 50, 37, 1)
+x_val = x[N:]
+x_val_rs = x_val.reshape(x_val.shape[0], 50, 37, 1)
+
+y_train = y[:N]
+y_val = y[N:]
+
+# Data Augmentation and Standarization  ----------------------------------------
+datagen = ImageDataGenerator(
+    featurewise_center=True,
+    featurewise_std_normalization=True,
+    rotation_range=8,
+    width_shift_range=0.08,
+    height_shift_range=0.08,
+    zoom_range=0.08,
+    horizontal_flip=True)
+datagen.fit(x_train_rs)
+datagen.standardize(x_val_rs)
+
+
 def evaluate(learning_rate=0.01, momentum=0.9, dropout_rate_1=0.01, dropout_rate_2=0.005, dropout_rate_3=0.005):
-    os.environ[‘CUDA_VISIBLE_DEVICES’] = '0'
-    ktf.set_session(get_session())
-    # Training and Validation Split ------------------------------------------------
-    B = 128  # Batch Size
-    N = B * 6  # Training Samples
-    E = 700  # Epochs
-
-    x = np.load('data/X_train.npy', 'c')
-    y = keras.utils.to_categorical(np.load('data/y_train.npy', 'r'), num_classes=7)
-    # Shuffle to prevent overfitting validation
-    p = np.random.permutation(len(x)); x = x[p]; y = y[p]  
-
-    x_train = x[:N]
-    x_train_rs = x_train.reshape(N, 50, 37, 1)
-    x_val = x[N:]
-    x_val_rs = x_val.reshape(x_val.shape[0], 50, 37, 1)
-
-    y_train = y[:N]
-    y_val = y[N:]
-
-    # Data Augmentation and Standarization  ----------------------------------------
-    datagen = ImageDataGenerator(
-        featurewise_center=True,
-        featurewise_std_normalization=True,
-        rotation_range=8,
-        width_shift_range=0.08,
-        height_shift_range=0.08,
-        zoom_range=0.08,
-        horizontal_flip=True)
-    datagen.fit(x_train_rs)
-
     # Uncomment to see Raw vs Standarized Data
     #for image in x_train_rs:
     #    fig = plt.figure()
@@ -109,7 +112,6 @@ def evaluate(learning_rate=0.01, momentum=0.9, dropout_rate_1=0.01, dropout_rate
     def gen():
         for x_batch, y_batch in datagen.flow(x_train_rs, y_train, batch_size=B):
             yield x_batch, y_batch
-    datagen.standardize(x_val_rs)
 
     # Remove when Submiting? (val_f1) --------------------
     from keras.callbacks import Callback 
