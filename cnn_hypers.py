@@ -11,7 +11,7 @@ from keras.callbacks import TensorBoard
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os
 
 import GPy
 import GPyOpt
@@ -32,6 +32,7 @@ def get_bounds():
           {'name': 'dr3', 'type': 'continuous', 'domain': [0.001, 1]}]
 
 def evaluate(learning_rate=0.01, momentum=0.9, dropout_rate_1=0.01, dropout_rate_2=0.005, dropout_rate_3=0.005):
+    os.environ[‘CUDA_VISIBLE_DEVICES’] = '0'
     ktf.set_session(get_session())
     # Training and Validation Split ------------------------------------------------
     B = 128  # Batch Size
