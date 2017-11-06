@@ -16,6 +16,12 @@ import numpy as np
 import GPy
 import GPyOpt
 from GPyOpt.methods import BayesianOptimization
+import keras.backend.tensorflow_backend as ktf
+
+def get_session():
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    return tf.Session(config=config)
 
 
 def get_bounds():
@@ -26,6 +32,7 @@ def get_bounds():
           {'name': 'dr3', 'type': 'continuous', 'domain': [0.001, 1]}]
 
 def evaluate(learning_rate=0.01, momentum=0.9, dropout_rate_1=0.01, dropout_rate_2=0.005, dropout_rate_3=0.005):
+    ktf.set_session(get_session())
     # Training and Validation Split ------------------------------------------------
     B = 128  # Batch Size
     N = B * 6  # Training Samples
