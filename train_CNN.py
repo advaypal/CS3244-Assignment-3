@@ -10,6 +10,14 @@ from keras.callbacks import TensorBoard
 
 import matplotlib.pyplot as plt
 import numpy as np
+import keras.backend.tensorflow_backend as ktf
+
+def get_session():
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    return tf.Session(config=config)
+
+ktf.set_session(get_session())
 
 # Training and Validation Split ------------------------------------------------
 B = 128  # Batch Size

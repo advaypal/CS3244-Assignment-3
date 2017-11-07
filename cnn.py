@@ -9,6 +9,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from keras.preprocessing.image import ImageDataGenerator
 
+
 # Code for data augmentation
 # datagen = ImageDataGenerator(
 #         rotation_range=40,
