@@ -18,7 +18,7 @@ import data_utils
 
 B = 128  # Batch Size
 N = B * 6  # Number of Training Samples
-E = 700  # Number of Epochs
+E = 800  # Number of Epochs
 
 
 def buildModel():
@@ -29,22 +29,17 @@ def buildModel():
         64, kernel_size=(7, 7), padding='valid', activation='relu', W_regularizer=l2(0.01)))
     model.add(Conv2D(
         64, (7, 7), activation='relu', padding='valid', W_regularizer=l2(0.001)))
-    model.add(Dropout(0.01))
-    #model.add(Conv2D(
-    #    64, kernel_size=(5, 5), padding='same', activation='relu', W_regularizer=l2(0.008)))
-    #model.add(Dropout(0.01))
+    model.add(Dropout(0.06))
     model.add(Flatten())
     model.add(Dense(128, activation='relu', W_regularizer=l2(0.005)))
-    model.add(Dropout(0.01))
+    model.add(Dropout(0.05))
     model.add(Dense(64, activation='relu', W_regularizer=l2(0.005)))
-    model.add(Dropout(0.005))
+    model.add(Dropout(0.07))
     model.add(Dense(7, activation='softmax'))
 
     # Create optimizer
-    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
-    model.compile(loss='categorical_crossentropy',
-                  optimizer=sgd,
-                  metrics=['accuracy'])
+    sgd = SGD(lr=0.015, decay=1e-6, momentum=0.7, nesterov=False)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
     # plot_model(model, to_file='model.png')  # Generate Image of Architecture
 
     return model
@@ -54,29 +49,17 @@ def buildModel():
 class Metrics(Callback):
     def on_train_begin(self, logs={}):
         self.val_f1s = []
-        self.val_recalls = []
-        self.val_precisions = []
 
-    def on_epoch_end(self, epoch, logs={}):
+    def on_epoch_end(self, epoch, logs={}):       
         val_predict = (
             np.asarray(self.model.predict(self.validation_data[0]))).round()
         val_targ = self.validation_data[1]
         _val_f1 = f1_score(val_targ, val_predict, average='samples')
-        _val_recall = recall_score(val_targ, val_predict, average='samples')
-        _val_precision = precision_score(val_targ, val_predict, average='samples')
-        self.val_f1s.append(_val_f1)
-        self.val_recalls.append(_val_recall)
-        self.val_precisions.append(_val_precision)
-        print("\tval_f1: %f — val_precision: %f — val_recall %f"
-              %(_val_f1, _val_precision, _val_recall))
+        
+        print('val_f1: %f -' % _val_f1, end=' ')
 
 
 def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
-    # Generator for training data
-    def gen():
-        for x_batch, y_batch in datagen.flow(xTrain, yTrain, batch_size=B):
-            yield x_batch, y_batch
-
     metrics = Metrics()
     metrics.validation_data = (xVal, yVal)
 
@@ -84,9 +67,9 @@ def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
     #                           write_graph=False, write_grads=True, write_images=True)
 
     # Train model
-    model.fit_generator(gen(), steps_per_epoch=N//B, epochs=E, verbose=2,
-                        validation_data=(xVal, yVal),
-                        callbacks=[metrics])
+    model.fit_generator(
+        datagen.flow(xTrain, yTrain, batch_size=B), steps_per_epoch=N//B,
+        epochs=E, verbose=2, validation_data=(xVal, yVal), callbacks=[metrics])
 
 
 def outputModelAndPredictions(model, xTest):
