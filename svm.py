@@ -37,7 +37,7 @@ def svmPredict(svmModel, featureVectors):
 
 
 if __name__ == '__main__':
-    trainSamples, trainLabels = np.load('data/train_embeddings.npy'), np.load('data/train_labels.npy')
+    trainSamples, trainLabels = data_utils.loadTrainData()
 
     learning_curve.plotLearningCurve(
         trainFunction=lambda samples, labels: svmTrain(samples,

@@ -1,11 +1,21 @@
 import os.path
 import numpy as np
+from keras.preprocessing.image import ImageDataGenerator
 
 DATA_FOLDER = 'data'
 TRAIN_SAMPLES = 'X_train.npy'
 TRAIN_LABELS = 'y_train.npy'
 TEST_SAMPLES = 'X_test.npy'
 TEST_LABELS = 'y_test.txt'
+
+DATAGEN = ImageDataGenerator(
+    featurewise_center=True,
+    featurewise_std_normalization=True,
+    rotation_range=5,
+    width_shift_range=0.05,
+    height_shift_range=0.05,
+    zoom_range=0.05,
+    horizontal_flip=True)
 
 
 def loadTrainData():
@@ -28,8 +38,14 @@ def writeTestLabels(labels):
     )
 
 
-if __name__ == '__main__':
-    trainSamples, trainLabels = loadTrainData()
-    print(trainSamples.shape, trainLabels.shape)
+def splitTrainVal(samples, labels, trainSplit):
+    return samples[:trainSplit], labels[:trainSplit], samples[trainSplit:], labels[trainSplit:]
 
-    writeTestLabels(trainLabels)
+
+def augmentData(samples):
+    DATAGEN.fit(samples)
+    return DATAGEN
+
+
+def standardizeData(samples):
+    DATAGEN.standardize(valSamples)
