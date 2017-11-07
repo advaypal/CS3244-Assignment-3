@@ -7,7 +7,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import plot_model
 from keras.regularizers import l2
 from keras.callbacks import TensorBoard
-
+import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 import keras.backend.tensorflow_backend as ktf

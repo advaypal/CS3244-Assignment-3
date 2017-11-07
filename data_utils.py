@@ -48,4 +48,4 @@ def augmentData(samples):
 
 
 def standardizeData(samples):
-    DATAGEN.standardize(valSamples)
+    DATAGEN.standardize(samples)
