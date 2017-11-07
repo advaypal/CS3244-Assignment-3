@@ -15,18 +15,14 @@ from keras.callbacks import Callback
 from sklearn.metrics import f1_score, precision_score, recall_score
 import data_utils
 
-def get_session():
-    config = tf.ConfigProto()
-    config.gpu_options.allow_growth = True
-    return tf.Session(config=config)
 
-# Training and Validation Split ------------------------------------------------
 B = 128  # Batch Size
-N = B * 6  # Training Samples
-E = 700  # Epochs
+N = B * 6  # Number of Training Samples
+E = 700  # Number of Epochs
 
 
 def buildModel():
+    # Architecture
     model = Sequential()
     model.add(BatchNormalization(input_shape=(50,37,1)))
     model.add(Conv2D(
@@ -44,6 +40,7 @@ def buildModel():
     model.add(Dropout(0.005))
     model.add(Dense(7, activation='softmax'))
 
+    # Create optimizer
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
     model.compile(loss='categorical_crossentropy',
                   optimizer=sgd,
@@ -53,6 +50,7 @@ def buildModel():
     return model
 
 
+# Metrics class to get validation metrics during training.
 class Metrics(Callback):
     def on_train_begin(self, logs={}):
         self.val_f1s = []
@@ -74,6 +72,7 @@ class Metrics(Callback):
 
 
 def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
+    # Generator for training data
     def gen():
         for x_batch, y_batch in datagen.flow(xTrain, yTrain, batch_size=B):
             yield x_batch, y_batch
@@ -81,10 +80,10 @@ def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
     metrics = Metrics()
     metrics.validation_data = (xVal, yVal)
 
-    # ------------------- End of Code from the Internet
+    # tensorboard = TensorBoard(log_dir='./logs', histogram_freq=10, batch_size=B,
+    #                           write_graph=False, write_grads=True, write_images=True)
 
-    #tensorboard = TensorBoard(log_dir='./logs', histogram_freq=10, batch_size=B,
-    #                          write_graph=False, write_grads=True, write_images=True)
+    # Train model
     model.fit_generator(gen(), steps_per_epoch=N//B, epochs=E, verbose=2,
                         validation_data=(xVal, yVal),
                         callbacks=[metrics])
@@ -98,9 +97,8 @@ def outputModelAndPredictions(model, xTest):
 
     data_utils.writeTestLabels(np.argmax(model.predict(xTest), axis=1))
 
-if __name__ == '__main__':
-    ktf.set_session(get_session())
 
+if __name__ == '__main__':
     x, y = data_utils.loadTrainData()
 
     # Shuffle to prevent overfitting validation

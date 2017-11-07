@@ -37,31 +37,37 @@ def predictSVM(svmModel, featureVectors):
     return svmModel.predict(featureVectors)
 
 
+def getMetrics(truthLabels, predLabels):
+    return (f1_score(truthLabels, predLabels, average='samples'),
+            precision_score(truthLabels, predLabels, average='samples'),
+            recall_score(truthLabels, predLabels, average='samples'))
+
+
 if __name__ == '__main__':
     x, y = data_utils.loadTrainData()
+
+    # Shuffle to prevent overfitting validation
     p = np.random.permutation(len(x)); x = x[p]; y = y[p]
 
     xTrain, yTrain, xVal, yVal = data_utils.splitTrainVal(x, y, 4 * x.shape[0] // 5)
 
     model = trainSVM(xTrain, yTrain, kernel='linear')
 
+    # Convert to one hot vectors since that's what sklearn metrics needs.
     yTrainCategorical = keras.utils.to_categorical(yTrain, num_classes=7)
     trainPredictions = predictSVM(model, xTrain)
     trainPredictions = keras.utils.to_categorical(trainPredictions, num_classes=7)
 
     print("\ttrain_f1: %f — train_precision: %f — train_recall %f"
-          %(f1_score(yTrainCategorical, trainPredictions, average='samples'),
-            precision_score(yTrainCategorical, trainPredictions, average='samples'),
-            recall_score(yTrainCategorical, trainPredictions, average='samples')))
+          %(getMetrics(yTrainCategorical, trainPredictions)))
 
+    # Convert to one hot vectors since that's what sklearn metrics needs.
     yValCategorical = keras.utils.to_categorical(yVal, num_classes=7)
     valPredictions = predictSVM(model, xVal)
     valPredictions = keras.utils.to_categorical(valPredictions, num_classes=7)
 
     print("\tval_f1: %f — val_precision: %f — val_recall %f"
-          %(f1_score(yValCategorical, valPredictions, average='samples'),
-            precision_score(yValCategorical, valPredictions, average='samples'),
-            recall_score(yValCategorical, valPredictions, average='samples')))
+          %(getMetrics(yValCategorical, valPredictions)))
 
     xTest = data_utils.loadTestSamples()
     testPredictions = predictSVM(model, xTest)

@@ -24,6 +24,7 @@ def buildFCNN():
         model.add(Dropout(0.03))
     model.add(Dense(7, activation='softmax'))
 
+    # Create optimizer
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
     model.compile(loss='categorical_crossentropy',
                   optimizer=sgd,
@@ -34,14 +35,16 @@ def buildFCNN():
 
 
 def trainFCNN(model, datagen, xTrain, yTrain, xVal, yVal):
-    # Training
+    # Generator for training data
     def gen():
         for x_batch, y_batch in datagen.flow(xTrain, yTrain, batch_size=B):
+            # Reshape batch since datagen generates images, but FCNN requires
+            # flattened input.
             yield (x_batch.reshape(B, 1850), y_batch)
 
+    # Train model
     model.fit_generator(gen(), steps_per_epoch=N//B, epochs=E, verbose=2,
                         validation_data=(xVal, yVal))
-
 
 
 def outputModelAndPredictions(model, xTest):
@@ -52,14 +55,20 @@ def outputModelAndPredictions(model, xTest):
 
     data_utils.writeTestLabels(np.argmax(model.predict(xTest), axis=1))
 
+
 if __name__ == '__main__':
     x, y = data_utils.loadTrainData()
+
+    # Shuffle to prevent overfitting validation
+    p = np.random.permutation(len(x)); x = x[p]; y = y[p]
+
     x = x.reshape(-1, 50, 37, 1)
     y = keras.utils.to_categorical(y, num_classes=7)
     xTrain, yTrain, xVal, yVal = data_utils.splitTrainVal(x, y, N)
 
     datagen = data_utils.augmentData(xTrain)
     data_utils.standardizeData(xVal)
+    # Reshape since datagen generates images, but FCNN requires flattened input.
     xVal = xVal.reshape(-1, 1850)
 
     model = buildFCNN()
@@ -68,6 +77,7 @@ if __name__ == '__main__':
     xTest = data_utils.loadTestSamples()
     xTest = xTest.reshape(-1, 50, 37, 1)
     data_utils.standardizeData(xTest)
+    # Reshape since datagen generates images, but FCNN requires flattened input.
     xTest = xTest.reshape(-1, 1850)
 
     outputModelAndPredictions(model, xTest)
