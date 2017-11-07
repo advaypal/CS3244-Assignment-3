@@ -46,7 +46,7 @@ def trainFCNN(model, datagen, xTrain, yTrain, xVal, yVal):
 
 def outputModelAndPredictions(model, xTest):
     # If 'Enter', Create Test Predictions File
-    input('continue...')
+    input('Press Enter to continue...')
 
     model.save('model.h5')  # Save Model Architecture and Weights
 
@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
     datagen = data_utils.augmentData(xTrain)
     data_utils.standardizeData(xVal)
+    xVal = xVal.reshape(-1, 1850)
 
     model = buildFCNN()
     trainFCNN(model, datagen, xTrain, yTrain, xVal, yVal)
@@ -67,5 +68,6 @@ if __name__ == '__main__':
     xTest = data_utils.loadTestSamples()
     xTest = xTest.reshape(-1, 50, 37, 1)
     data_utils.standardizeData(xTest)
+    xTest = xTest.reshape(-1, 1850)
 
     outputModelAndPredictions(model, xTest)

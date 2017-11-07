@@ -92,7 +92,7 @@ def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
 
 def outputModelAndPredictions(model, xTest):
     # If 'Enter', Create Test Predictions File
-    input('continue...')
+    input('Press Enter to continue...')
 
     model.save('model.h5')  # Save Model Architecture and Weights
 
