@@ -13,13 +13,12 @@ import numpy as np
 import keras.backend.tensorflow_backend as ktf
 from keras.callbacks import Callback
 from sklearn.metrics import f1_score, precision_score, recall_score
+import data_utils
 
 def get_session():
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     return tf.Session(config=config)
-
-ktf.set_session(get_session())
 
 # Training and Validation Split ------------------------------------------------
 B = 128  # Batch Size
@@ -91,21 +90,17 @@ def trainCNN(model, datagen, xTrain, yTrain, xVal, yVal):
                         callbacks=[metrics])
 
 
-def outputModel(model, xTest):
+def outputModelAndPredictions(model, xTest):
     # If 'Enter', Create Test Predictions File
     input('continue...')
 
     model.save('model.h5')  # Save Model Architecture and Weights
 
-    f = open('predictions.txt', 'w')
-    print('ImageId,PredictedClass')
-    f.write('ImageId,PredictedClass\n')
-    for i, p in enumerate(np.argmax(model.predict(xTest), axis=1)):
-        print('%d,%d' % (i, p))
-        f.write('%d,%d\n' % (i, p))
-    f.close()
+    data_utils.writeTestLabels(np.argmax(model.predict(xTest), axis=1))
 
 if __name__ == '__main__':
+    ktf.set_session(get_session())
+
     x, y = data_utils.loadTrainData()
 
     # Shuffle to prevent overfitting validation
@@ -125,4 +120,4 @@ if __name__ == '__main__':
     xTest = xTest.reshape(-1, 50, 37, 1)
     data_utils.standardizeData(xTest)
 
-    outputModel(model, xTest)
+    outputModelAndPredictions(model, xTest)

@@ -6,7 +6,7 @@ DATA_FOLDER = 'data'
 TRAIN_SAMPLES = 'X_train.npy'
 TRAIN_LABELS = 'y_train.npy'
 TEST_SAMPLES = 'X_test.npy'
-TEST_LABELS = 'y_test.txt'
+TEST_LABELS = 'predictions.txt'
 
 DATAGEN = ImageDataGenerator(
     featurewise_center=True,

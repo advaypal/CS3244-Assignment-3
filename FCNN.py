@@ -4,7 +4,7 @@ from keras.layers import BatchNormalization, Dense, Dropout, Activation
 from keras.optimizers import SGD
 from keras.utils import plot_model
 from keras.regularizers import l2
-import data_io
+import data_utils
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,19 +44,13 @@ def trainFCNN(model, datagen, xTrain, yTrain, xVal, yVal):
 
 
 
-def outputModel(model, xTest):
+def outputModelAndPredictions(model, xTest):
     # If 'Enter', Create Test Predictions File
     input('continue...')
 
     model.save('model.h5')  # Save Model Architecture and Weights
 
-    f = open('predictions.txt', 'w')
-    print('ImageId,PredictedClass')
-    f.write('ImageId,PredictedClass\n')
-    for i, p in enumerate(np.argmax(model.predict(xTest), axis=1)):
-        print('%d,%d' % (i, p))
-        f.write('%d,%d\n' % (i, p))
-    f.close()
+    data_utils.writeTestLabels(np.argmax(model.predict(xTest), axis=1))
 
 if __name__ == '__main__':
     x, y = data_utils.loadTrainData()
@@ -74,4 +68,4 @@ if __name__ == '__main__':
     xTest = xTest.reshape(-1, 50, 37, 1)
     data_utils.standardizeData(xTest)
 
-    outputModel(model, xTest)
+    outputModelAndPredictions(model, xTest)
